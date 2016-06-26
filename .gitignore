@@ -1,0 +1,6 @@
+/demo/node_modules
+/demo/platforms
+/plugin/*.map
+/demo/app/*.map
+/demo/.vscode
+/pushall.sh

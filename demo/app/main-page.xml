@@ -1,0 +1,14 @@
+<Page xmlns="http://schemas.nativescript.org/tns.xsd"
+      xmlns:taskPie="nativescript-taskpie"
+      navigatingTo="onNavigatingTo">
+      
+  <Page.actionBar>
+    <ActionBar title="nativescript-taskpie Demo">
+    </ActionBar>
+  </Page.actionBar>
+
+  <taskPie:TaskPie id="mjk-test-taskpie"
+                   pieSize="{{ pieSize }}"
+                   description="{{ daysLeft ? (daysLeft + ' days left') : null }}"
+                   pieText="{{ pie.totalLeft }}" pieSubText="tasks left" />
+</Page>

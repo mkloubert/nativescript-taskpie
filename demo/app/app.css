@@ -1,0 +1,48 @@
+﻿.nsTaskPie-pieTextArea {
+    margin-top: -16;
+}
+
+.nsTaskPie-pieText {
+    text-align: center;
+    font-size: 40;
+    color: #a6a6a6;
+    padding: 0;
+}
+
+.nsTaskPie-pieSubText {
+    text-align: center;
+    font-size: 20;
+    color: #a6a6a6;
+    margin-top: -8;
+    padding: 0;
+}
+
+.nsTaskPie-border {
+    height: 8;
+}
+
+.nsTaskPie-category {
+    margin-left: 4;
+    margin-right: 4;
+}
+
+.nsTaskPie-category .nsTaskPie-count,
+.nsTaskPie-category .nsTaskPie-name,
+.nsTaskPie-description {
+    text-align: center;
+    color: #333333;
+}
+
+.nsTaskPie-category .nsTaskPie-count {
+    font-size: 16;
+    margin-top: 4;
+}
+
+.nsTaskPie-category .nsTaskPie-name {
+    font-size: 12;
+}
+
+.nsTaskPie-description {
+    font-size: 20;
+    margin-bottom: 12;
+}
