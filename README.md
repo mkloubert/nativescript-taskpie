@@ -12,7 +12,7 @@ A [NativeScript](https://nativescript.org/) module for drawing Microsoft Planner
 ## Platforms
 
 * Android
-* iOS
+* iOS (currently in progress!)
 
 ## Installation
 
