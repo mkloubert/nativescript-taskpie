@@ -307,3 +307,40 @@ interface ITaskCategory {
 ```
 
 The recommed way is to use the `addCategory()` method. These method creates `ITaskCategory` objects that raise change events for its properties, so this has better support for data binding.
+
+## Data binding
+
+the following example is similar to the [demp app](https://github.com/mkloubert/nativescript-taskpie/tree/master/demo).
+
+### XML
+
+```xml
+<Page xmlns="http://schemas.nativescript.org/tns.xsd"
+      xmlns:taskPie="nativescript-taskpie"
+      navigatingTo="onNavigatingTo">
+
+  <taskPie:TaskPie id="my-taskpie"
+                   pieSize="{{ pieSize }}"
+                   description="{{ daysLeft ? (daysLeft + ' days left') : null }}"
+                   pieText="{{ pie.totalLeft }}" pieSubText="tasks left" />
+</Page>
+```
+
+### ViewModel
+
+```typescript
+import Observable = require("data/observable");
+import TaskPieModule = require('nativescript-taskpie');
+
+export function onNavigatingTo(args) {
+    var page = args.object;
+    var pie = page.getViewById('my-taskpie');
+
+    var viewModel = new Observable.Observable();
+    viewModel.set('daysLeft', 79);
+    viewModel.set('pie', pie);
+    viewModel.set('pieSize', 720);  // draw pie with 720x720
+    
+    page.bindingContext = viewModel;
+}
+```
