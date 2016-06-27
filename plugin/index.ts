@@ -503,7 +503,7 @@ export class TaskPie extends Grid.GridLayout {
             }
 
             var nv = itemGetter(i);
-            if (TypeUtils.isUndefined(nv)) {
+            if (isEmptyString(nv)) {
                 continue;
             }
 

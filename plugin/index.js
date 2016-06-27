@@ -164,7 +164,7 @@ var TaskPie = (function (_super) {
                     break;
                 }
                 var nv = itemGetter(i);
-                if (TypeUtils.isUndefined(nv)) {
+                if (isEmptyString(nv)) {
                     continue;
                 }
                 var cat = this._categoryGetter(i);
