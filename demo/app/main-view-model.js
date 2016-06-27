@@ -4,12 +4,14 @@ var Timer = require('timer');
 function createViewModel(pie) {
     var viewModel = new Observable.Observable();
     viewModel.set('pie', pie);
-    viewModel.set('pieSize', 540);
-    viewModel.set('daysLeft', 79);
+    viewModel.set('pieSize', 720);
     var catNotStarted = pie.getCategory(0);
     var catLate = pie.getCategory(1);
     var catInProgress = pie.getCategory(2);
     var catCompleted = pie.getCategory(3);
+    var intervalNotStarted;
+    var intervalInProgress;
+    var intervalLate;
     var resetIfAllDone = function () {
         if (pie.totalLeft > 0) {
             return;
@@ -18,12 +20,19 @@ function createViewModel(pie) {
         catLate.count = 4;
         catInProgress.count = 1;
         catCompleted.count = 11;
+        viewModel.set('daysLeft', 79);
+    };
+    var updateDaysLeft = function () {
+        var daysLeft = viewModel.get('daysLeft');
+        viewModel.set('daysLeft', --daysLeft);
     };
     resetIfAllDone();
     Timer.setTimeout(function () {
         // not started
-        Timer.setInterval(function () {
+        intervalNotStarted = Timer.setInterval(function () {
+            updateDaysLeft();
             if (catNotStarted.count < 1) {
+                Timer.clearInterval(intervalNotStarted);
                 resetIfAllDone();
                 return;
             }
@@ -31,8 +40,10 @@ function createViewModel(pie) {
             ++catInProgress.count;
         }, 1000);
         // in progress
-        Timer.setInterval(function () {
+        intervalInProgress = Timer.setInterval(function () {
+            updateDaysLeft();
             if (catInProgress.count < 1) {
+                Timer.clearInterval(intervalInProgress);
                 resetIfAllDone();
                 return;
             }
@@ -40,15 +51,17 @@ function createViewModel(pie) {
             ++catCompleted.count;
         }, 2000);
         // late
-        Timer.setInterval(function () {
+        intervalLate = Timer.setInterval(function () {
+            updateDaysLeft();
             if (catLate.count < 1) {
+                Timer.clearInterval(intervalLate);
                 resetIfAllDone();
                 return;
             }
             --catLate.count;
             ++catCompleted.count;
         }, 3000);
-    }, 5000);
+    }, 3000);
     return viewModel;
 }
 exports.createViewModel = createViewModel;

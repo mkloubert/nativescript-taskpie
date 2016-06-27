@@ -46,6 +46,16 @@ export const TASKPIE_FIELD_ISEDITING = 'isEditing';
  */
 export interface IBitmap {
     /**
+     * Applies that bitmap over an image view.
+     * 
+     * @param {Image} view The target view.
+     * @param {Boolean} [disposeOld] Dispose old bitmap of view or not.
+     * 
+     * @return {Boolean} Operation was successful or not.
+     */
+    apply(view: Image, disposeOld?: boolean): boolean;
+
+    /**
      * Frees memory.
      */
     dispose();
@@ -209,6 +219,22 @@ export class TaskPie extends Grid.GridLayout {
                              })
     );
     /**
+     * Dependency property for 'pieGridStyle'
+     */
+    public static pieGridStyleProperty = new Property(
+        "pieGridStyle",
+        "TaskPie",
+        new PropertyMetadata(null,
+                             PropertyMetadataSettings.Inheritable,
+                             null,
+                             () => true,
+                             (data) => {
+                                 var tp = <TaskPie>data.object;
+
+                                 tp.pieGridStyle = toStringSafe(data.newValue);
+                             })
+    );
+    /**
      * Dependency property for 'pieStyle'
      */
     public static pieStyleProperty = new Property(
@@ -312,6 +338,7 @@ export class TaskPie extends Grid.GridLayout {
     private _categoryGrid: Grid.GridLayout;
     private _categoryStyle: string;
     private _descriptionField: Label;
+    private _pieGrid: Grid.GridLayout;
     private _pieImage: Image;
     private _pieSize: number;
     private _pieSubTextField: Label;
@@ -365,6 +392,11 @@ export class TaskPie extends Grid.GridLayout {
 
         this.raiseCategoryProperties(true);
     }
+
+    /**
+     * Sets a custom function that creates a view from a task category.
+     */
+    public categoryFactory: (category: ITaskCategory, index: number, pie: TaskPie) => View;
 
     /**
      * Gets the grid that stores the category views.
@@ -474,16 +506,18 @@ export class TaskPie extends Grid.GridLayout {
         this.addRow(new Grid.ItemSpec(1, "auto"));
         this.addColumn(new Grid.ItemSpec(1, "star"));
 
-        var pieGrid = new Grid.GridLayout();
-        pieGrid.horizontalAlignment = UIEnums.HorizontalAlignment.stretch;
-        pieGrid.verticalAlignment =  UIEnums.VerticalAlignment.center;
-        pieGrid.addRow(new Grid.ItemSpec(1, "auto"));
-        pieGrid.addColumn(new Grid.ItemSpec(1, "star"));
-        pieGrid.addColumn(new Grid.ItemSpec(4, "star"));
-        pieGrid.addColumn(new Grid.ItemSpec(1, "star"));
-        this.addChild(pieGrid);
-        Grid.GridLayout.setRow(pieGrid, 0);
-        Grid.GridLayout.setColumn(pieGrid, 0);
+        // pie grid
+        this._pieGrid = new Grid.GridLayout();
+        this._pieGrid.cssClass = 'nsTaskPie-pieArea';
+        this._pieGrid.horizontalAlignment = UIEnums.HorizontalAlignment.stretch;
+        this._pieGrid.verticalAlignment =  UIEnums.VerticalAlignment.center;
+        this._pieGrid.addRow(new Grid.ItemSpec(1, "auto"));
+        this._pieGrid.addColumn(new Grid.ItemSpec(1, "star"));
+        this._pieGrid.addColumn(new Grid.ItemSpec(4, "star"));
+        this._pieGrid.addColumn(new Grid.ItemSpec(1, "star"));
+        this.addChild(this._pieGrid);
+        Grid.GridLayout.setRow(this._pieGrid, 0);
+        Grid.GridLayout.setColumn(this._pieGrid, 0);
 
         // pie
         this._pieImage = new Image();
@@ -491,27 +525,28 @@ export class TaskPie extends Grid.GridLayout {
         this._pieImage.stretch = UIEnums.Stretch.aspectFill;
         this._pieImage.horizontalAlignment = UIEnums.HorizontalAlignment.stretch;
         this._pieImage.verticalAlignment =  UIEnums.VerticalAlignment.center;
-        pieGrid.addChild(this._pieImage);
+        this._pieGrid.addChild(this._pieImage);
         Grid.GridLayout.setRow(this._pieImage, 0);
         Grid.GridLayout.setColumn(this._pieImage, 1);
 
         this._pieTextArea = new Stack.StackLayout();
-        this._pieTextArea.cssClass = 'nsTaskPie-pieTextArea';
+        this._pieTextArea.cssClass = 'nsTaskPie-textArea';
         this._pieTextArea.horizontalAlignment = UIEnums.HorizontalAlignment.stretch;
         this._pieTextArea.verticalAlignment = UIEnums.VerticalAlignment.center;
-        this.addChild(this._pieTextArea);
+        this._pieGrid.addChild(this._pieTextArea);
         Grid.GridLayout.setRow(this._pieTextArea, 0);
         Grid.GridLayout.setColumn(this._pieTextArea, 0);
+        Grid.GridLayout.setColumnSpan(this._pieTextArea, 3);
 
         // pie text
         this._pieTextField = new Label();
-        this._pieTextField.cssClass = 'nsTaskPie-pieText';
+        this._pieTextField.cssClass = 'nsTaskPie-text';
         this._pieTextField.textWrap = true;
         this._pieTextArea.addChild(this._pieTextField);
 
         // pie sub text
         this._pieSubTextField = new Label();
-        this._pieSubTextField.cssClass = 'nsTaskPie-pieSubText';
+        this._pieSubTextField.cssClass = 'nsTaskPie-subText';
         this._pieSubTextField.textWrap = true;
         this._pieTextArea.addChild(this._pieSubTextField);
         
@@ -523,6 +558,7 @@ export class TaskPie extends Grid.GridLayout {
         this._descriptionField.verticalAlignment = UIEnums.VerticalAlignment.center;
         this.addChild(this._descriptionField);
         Grid.GridLayout.setRow(this._descriptionField, 1);
+        Grid.GridLayout.setColumn(this._descriptionField, 0);
 
         // initialize with defaults
         this.edit((pie) => {
@@ -540,6 +576,21 @@ export class TaskPie extends Grid.GridLayout {
      */
     public get length(): number {
         return this._categoryLength();
+    }
+
+    /**
+     * Gets the grid that contains the anything of the pie
+     * like image and text fields.
+     */
+    public get pieGrid(): Grid.GridLayout {
+        return this._pieGrid;
+    }
+
+    /**
+     * Sets the style for the pie grid.
+     */
+    public set pieGridStyle(style: string) {
+        this._pieGrid.setInlineStyle(style);
     }
 
     /**
@@ -679,6 +730,7 @@ export class TaskPie extends Grid.GridLayout {
         var categoryLength = this._categoryLength;
         var categoryGetter = this._categoryGetter;
 
+        // remove old category grid
         if (!TypeUtils.isNullOrUndefined(this._categoryGrid)) {
             this.removeChild(this._categoryGrid);
 
@@ -697,6 +749,7 @@ export class TaskPie extends Grid.GridLayout {
         var ratio = pieSize / 300.0;
 
         var isPieVisible = false;
+        var disposeBitmap = false;
         var pieBitmap = <IBitmap>TaskPieHelpers.createBitmap(pieSize, pieSize);
         try {
             // draw pie
@@ -738,10 +791,21 @@ export class TaskPie extends Grid.GridLayout {
                                      innerColor, innerColor);
             }
 
-            this._pieImage.src = pieBitmap.toDataUrl();
+            if (!pieBitmap.apply(this._pieImage, true)) {
+                disposeBitmap = true;
+
+                this._pieImage.src = pieBitmap.toDataUrl();
+            }
+        }
+        catch (e) {
+            disposeBitmap = true;
+
+            throw e;
         }
         finally {
-            pieBitmap.dispose();
+            if (disposeBitmap) {
+                pieBitmap.dispose();
+            }
         }
 
         this._pieImage.visibility = isPieVisible ? UIEnums.Visibility.visible
@@ -753,49 +817,62 @@ export class TaskPie extends Grid.GridLayout {
         newCatGrid.addRow(new Grid.ItemSpec(1, "star"));
         newCatGrid.cssClass = 'nsTaskPie-categories';
         if (categoryLength() > 0) {
+            var catFactory = this.categoryFactory;
+            if (TypeUtils.isNullOrUndefined(catFactory)) {
+                // set default factory
+
+                catFactory = (c: ITaskCategory, ci: number, p: TaskPie) => {
+                    // category stack
+                    var newCatView = new Stack.StackLayout();
+                    newCatView.cssClass = 'nsTaskPie-category';
+
+                    // border
+                    var catViewBorder = new Border.Border();
+                    catViewBorder.cssClass = 'nsTaskPie-border';
+                    catViewBorder.horizontalAlignment = UIEnums.HorizontalAlignment.stretch;
+                    if (!isEmptyString(c.color))
+                    {
+                        catViewBorder.backgroundColor = new Color.Color('#' + c.color);
+                    }
+                    newCatView.addChild(catViewBorder);
+
+                    // count
+                    var catViewCountLabel = new Label();
+                    catViewCountLabel.textWrap = true;
+                    catViewCountLabel.cssClass = 'nsTaskPie-count';
+                    catViewCountLabel.horizontalAlignment = UIEnums.HorizontalAlignment.stretch;
+                    if (!isEmptyString(c.count)) {
+                        catViewCountLabel.text = ('' + c.count).trim();
+                    }
+                    p.updateVisibilityOfViewByString(catViewCountLabel.text, catViewCountLabel);
+                    newCatView.addChild(catViewCountLabel);
+
+                    // task name
+                    var catViewNameLabel = new Label();
+                    catViewNameLabel.textWrap = true;
+                    catViewNameLabel.cssClass = 'nsTaskPie-name';
+                    catViewNameLabel.horizontalAlignment = UIEnums.HorizontalAlignment.stretch;
+                    if (!isEmptyString(c.name)) {
+                        catViewNameLabel.text = ('' + c.name).trim();
+                    }
+                    p.updateVisibilityOfViewByString(catViewNameLabel.text, catViewNameLabel);
+                    newCatView.addChild(catViewNameLabel);
+
+                    return newCatView;
+                };
+            }
+
             for (var i = 0; i < this._categories.length; i++) {
-                var cat = categoryGetter(i);
+                newCatGrid.addColumn(new Grid.ItemSpec(1, "star"));
 
-                newCatGrid.addColumn(new Grid.ItemSpec(this._categories.length, "star"));
-
-                // category stack
-                var newCatView = new Stack.StackLayout();
-                newCatView.cssClass = 'nsTaskPie-category';
-                newCatGrid.addChild(newCatView);
-                Grid.GridLayout.setRow(newCatView, 0);
-                Grid.GridLayout.setColumn(newCatView, i);
-
-                // border
-                var catViewBorder = new Border.Border();
-                catViewBorder.cssClass = 'nsTaskPie-border';
-                catViewBorder.horizontalAlignment = UIEnums.HorizontalAlignment.stretch;
-                if (!isEmptyString(cat.color))
-                {
-                    catViewBorder.backgroundColor = new Color.Color('#' + cat.color);
+                var catView = catFactory(categoryGetter(i), i, this);
+                if (TypeUtils.isNullOrUndefined(catView)) {
+                    continue;
                 }
-                newCatView.addChild(catViewBorder);
 
-                // count
-                var catViewCountLabel = new Label();
-                catViewCountLabel.textWrap = true;
-                catViewCountLabel.cssClass = 'nsTaskPie-count';
-                catViewCountLabel.horizontalAlignment = UIEnums.HorizontalAlignment.stretch;
-                if (!isEmptyString(cat.count)) {
-                    catViewCountLabel.text = ('' + cat.count).trim();
-                }
-                this.updateVisibilityOfViewByString(catViewCountLabel.text, catViewCountLabel);
-                newCatView.addChild(catViewCountLabel);
-
-                // task name
-                var catViewNameLabel = new Label();
-                catViewNameLabel.textWrap = true;
-                catViewNameLabel.cssClass = 'nsTaskPie-name';
-                catViewNameLabel.horizontalAlignment = UIEnums.HorizontalAlignment.stretch;
-                if (!isEmptyString(cat.name)) {
-                    catViewNameLabel.text = ('' + cat.name).trim();
-                }
-                this.updateVisibilityOfViewByString(catViewNameLabel.text, catViewNameLabel);
-                newCatView.addChild(catViewNameLabel);
+                newCatGrid.addChild(catView);
+                Grid.GridLayout.setRow(catView, 0);
+                Grid.GridLayout.setColumn(catView, i);
             }    
         }
 
@@ -1006,9 +1083,9 @@ export class TaskPie extends Grid.GridLayout {
      * @param {String} [ifEmpty] The custom visibility value if 'str' is empty.
      * @param {String} [ifNotEmpty] The custom visibility value if 'str' is NOT empty.
      */
-    protected updateVisibilityOfViewByString(str: string, view: View,
-                                             ifEmpty: string = UIEnums.Visibility.collapsed,
-                                             ifNotEmpty: string = UIEnums.Visibility.visible) {
+    public updateVisibilityOfViewByString(str: string, view: View,
+                                          ifEmpty: string = UIEnums.Visibility.collapsed,
+                                          ifNotEmpty: string = UIEnums.Visibility.visible) {
 
         if (TypeUtils.isNullOrUndefined(view)) {
             return;

@@ -45,11 +45,60 @@ function createBitmap(width, height) {
         __bitmap: androidBMP,
         __canvas: new android.graphics.Canvas(androidBMP),
 
+        apply: function(view, disposeOld) {
+            if (arguments.length < 2) {
+                disposeOld = true;
+            }
+
+            if (disposeOld) {
+                // try to recyle old bitmap
+
+                var hasBeenRecycled = false;
+                try {
+                    if (!TypeUtils.isNullOrUndefined(view.android)) {
+                        var drawable = view.android.getDrawable();
+                        if (!TypeUtils.isNullOrUndefined(drawable)) {
+                            if (!TypeUtils.isNullOrUndefined(drawable.getBitmap)) {
+                                drawable.getBitmap().recycle();
+                                hasBeenRecycled = true;
+                            }
+                        }
+                    }
+                }
+                catch (e) {
+                    console.log("[ERROR] TaskPieHelpers.android.apply(): " + e);
+                }
+
+                if (!hasBeenRecycled) {
+                    try {
+                        view.src = null;
+                    }
+                    catch (e) {
+                        console.log("[ERROR] TaskPieHelpers.android.apply(): " + e);
+                    }
+                }
+            }
+
+            var hasApplied = false;
+            try {
+                if (!TypeUtils.isNullOrUndefined(view.android)) {
+                    view.android.setImageBitmap(this.__bitmap);
+                    hasApplied = true;
+                }
+            }
+            catch (e) {
+                console.log("[ERROR] TaskPieHelpers.android.apply(): " + e);
+            }
+            
+            return hasApplied;
+        },
+
         dispose: function() {
             try {
                 this.__bitmap.recycle();
             }
             finally {
+                androidBMP = null;
                 this.__bitmap = null;
                 this.__canvas = null;
             }
