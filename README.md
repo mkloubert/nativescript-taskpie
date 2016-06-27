@@ -211,15 +211,99 @@ To image how the view looks like you can have a look at the following XML:
 
 | Name | Description | CSS class |
 | ---- | --------- | --------- | --------- |
-| categories | The custom category list. | --- |
+| categories | The custom category list. | `nsTaskPie-categories` |
 | categoryStyle | CSS style for category area. | `nsTaskPie-categories` |
-| description | The description (text under the pie). | --- |
+| description | The description (text under the pie). | `nsTaskPie-description` |
 | descriptionStyle | CSS style of the description. | `nsTaskPie-description` |
 | pieGridStyle | CSS style of the grid tat contains the pie and its texts.  | `nsTaskPie-pieArea` |
-| pieSize | The size the pie is drawed with. The highter the better is the quality, but needs more memory. Default: `300` | --- |
+| pieSize | The size the pie is drawed with. The highter the better is the quality, but needs more memory. Default: `300` | `nsTaskPie-pie` |
 | pieStyle | CSS style of the pie image. | `nsTaskPie-pie` |
-| pieSubText | The sub text of the pie. | --- |
+| pieSubText | The sub text of the pie. | `nsTaskPie-subText` |
 | pieSubTextStyle | CSS style of the pie's sub text. | `nsTaskPie-subText` |
-| pieText | The pie text. | --- |
+| pieText | The pie text. | `nsTaskPie-text` |
 | pieTextAreaStyle | CSS style of the area that contains the pie texts. | `nsTaskPie-textArea` |
 | pieTextStyle | CSS style of the pie's text. | `nsTaskPie-text` |
+
+## Add own categories
+
+You can use the `addCategory()` method to add categories.
+
+```typescript
+import TaskPieModule = require('nativescript-taskpie');
+
+export function onNavigatingTo(args) {
+    var page = args.object;
+    
+    var pie = <TaskPieModule.TaskPie>page.getViewById('my-taskpie'));
+    
+    // this switches the view in 'edit mode'
+    // what means that is not refresh until the action
+    // has been finished
+    pie.edit(() => {
+        pie.clearCategories();
+        
+        pie.addCategory('Pending', 'ffc90e', TaskPieModule.TaskCategoryType.NotStarted)
+           .addCategory('Late!', 'd54130', TaskPieModule.TaskCategoryType.NotStarted)
+           .addCategory('On work', '4cabe1', TaskPieModule.TaskCategoryType.InProgress)
+           .addCategory('Complete', '88be39', TaskPieModule.TaskCategoryType.Completed);
+    });
+}
+```
+
+You also can use the `categories` (dependency) property to set an own list of items.
+
+```typescript
+pie.categories = [
+    {
+        name: 'Pending',
+        color: 'ffc90e',
+        type: TaskPieModule.TaskCategoryType.NotStarted,
+    },
+    
+    {
+        name: 'Late!',
+        color: 'd54130',
+        type: TaskPieModule.TaskCategoryType.NotStarted,
+    },
+    
+    {
+        name: 'On work',
+        color: '4cabe1',
+        type: TaskPieModule.TaskCategoryType.InProgress,
+    },
+    
+    {
+        name: 'Complete',
+        color: '88be39',
+        type: TaskPieModule.TaskCategoryType.Completed,
+    },
+];
+```
+
+Each item has the following structure:
+
+```typescript
+interface ITaskCategory {
+    /**
+     * The color.
+     */
+    color?: string | number | Color.Color;
+
+    /**
+     * Number of tasks.
+     */
+    count?: number;
+
+    /**
+     * The name.
+     */
+    name: string;
+
+    /**
+     * The type.
+     */
+    type?: TaskCategoryType;
+}
+```
+
+The recommed way is to use the `addCategory()` method. These method creates `ITaskCategory` objects that raise change events for its properties, so this has better support for data binding.
