@@ -164,6 +164,25 @@ export class TaskPie extends Grid.GridLayout {
                              })
     );
     /**
+     * Dependency property for 'counts'
+     */
+    public static countsProperty = new Property(
+        "counts",
+        "TaskPie",
+        new PropertyMetadata(null,
+                             PropertyMetadataSettings.Inheritable,
+                             null,
+                             (value) => (value instanceof Array) ||
+                                        (value instanceof ObservableArray) ||
+                                        (value instanceof VirtualArray) ||
+                                        isEmptyString(value),
+                             (data) => {
+                                 var tp = <TaskPie>data.object;
+
+                                 tp.counts = data.newValue;
+                             })
+    );
+    /**
      * Dependency property for 'description'
      */
     public static descriptionProperty = new Property(
@@ -196,6 +215,22 @@ export class TaskPie extends Grid.GridLayout {
                              })
     );
     /**
+     * Dependency property for 'pieGridStyle'
+     */
+    public static pieGridStyleProperty = new Property(
+        "pieGridStyle",
+        "TaskPie",
+        new PropertyMetadata(null,
+                             PropertyMetadataSettings.Inheritable,
+                             null,
+                             () => true,
+                             (data) => {
+                                 var tp = <TaskPie>data.object;
+
+                                 tp.pieGridStyle = toStringSafe(data.newValue);
+                             })
+    );
+    /**
      * Dependency property for 'pieSize'
      */
     public static pieSizeProperty = new Property(
@@ -216,22 +251,6 @@ export class TaskPie extends Grid.GridLayout {
                                  }
 
                                  tp.pieSize = parseFloat(toStringSafe(data.newValue).trim());
-                             })
-    );
-    /**
-     * Dependency property for 'pieGridStyle'
-     */
-    public static pieGridStyleProperty = new Property(
-        "pieGridStyle",
-        "TaskPie",
-        new PropertyMetadata(null,
-                             PropertyMetadataSettings.Inheritable,
-                             null,
-                             () => true,
-                             (data) => {
-                                 var tp = <TaskPie>data.object;
-
-                                 tp.pieGridStyle = toStringSafe(data.newValue);
                              })
     );
     /**
@@ -299,6 +318,22 @@ export class TaskPie extends Grid.GridLayout {
                              })
     );
     /**
+     * Dependency property for 'pieTextAreaStyle'
+     */
+    public static pieTextAreaStyleProperty = new Property(
+        "pieTextAreaStyle",
+        "TaskPie",
+        new PropertyMetadata(null,
+                             PropertyMetadataSettings.Inheritable,
+                             null,
+                             () => true,
+                             (data) => {
+                                 var tp = <TaskPie>data.object;
+
+                                 tp.pieTextAreaStyle = toStringSafe(data.newValue);
+                             })
+    );
+    /**
      * Dependency property for 'pieTextStyle'
      */
     public static pieTextStyleProperty = new Property(
@@ -312,22 +347,6 @@ export class TaskPie extends Grid.GridLayout {
                                  var tp = <TaskPie>data.object;
 
                                  tp.pieTextStyle = toStringSafe(data.newValue);
-                             })
-    );
-    /**
-     * Dependency property for 'pieTextStyle'
-     */
-    public static pieTextAreaStyleProperty = new Property(
-        "pieTextAreaStyle",
-        "TaskPie",
-        new PropertyMetadata(null,
-                             PropertyMetadataSettings.Inheritable,
-                             null,
-                             () => true,
-                             (data) => {
-                                 var tp = <TaskPie>data.object;
-
-                                 tp.pieTextAreaStyle = toStringSafe(data.newValue);
                              })
     );
 
@@ -420,6 +439,72 @@ export class TaskPie extends Grid.GridLayout {
     public clearCategories(): TaskPie {
         this.categories = new ObservableArray<ITaskCategory>();
         return this;
+    }
+
+    /**
+     * Gets or sets the 'count' values of the underlying task categories.
+     * 
+     * @throws At least one new value is no valid number.
+     */
+    public get counts(): string | number[] | ObservableArray<number> | VirtualArray<number> {
+        var countList = new ObservableArray<number>();
+        
+        for (var i = 0; i < this._categoryLength(); i++) {
+            var cnt: number = null;
+            
+            var cat = this._categoryGetter(i);
+            if (!TypeUtils.isNullOrUndefined(cat)) {
+                cnt = cat.count;
+            }
+
+            countList.push(cnt);
+        }
+
+        return countList;
+    }
+    public set counts(value: string | number[] | ObservableArray<number> | VirtualArray<number>) {
+        if (isEmptyString(value)) {
+            return;
+        }
+
+        var v: any = value;
+
+        if (!(v instanceof ObservableArray) && !(v instanceof VirtualArray)) {
+            // handle as , separated string
+            // and convert 'v' to an array of numbers
+
+            var parts = ('' + v).trim().split(',');
+            v = [];
+
+            for (var i = 0; i < parts.length; i++) {
+                var p: any = parts[i].trim();
+                var cv = null;
+
+                if (!isEmptyString(p)) {
+                    if (isNaN(p)) {
+                        throw "'" + p + "' is NOT a number!";
+                    }
+
+                    cv = parseFloat(p);
+                }
+
+                v.push(cv);
+            }
+        }
+
+        var itemGetter: (itemIndex: number) => number = (itemIndex) => v[itemIndex];
+        if ((v instanceof ObservableArray) || (v instanceof VirtualArray)) {
+            itemGetter = (itemIndex) => v.getItem(itemIndex);
+        }
+
+        for (var i = 0; i < v.length; i++) {
+            if (i >= this._categoryLength()) {
+                break;
+            }
+
+            var cat = this._categoryGetter(i);
+            cat.count = itemGetter(i);
+        }
     }
 
     /**

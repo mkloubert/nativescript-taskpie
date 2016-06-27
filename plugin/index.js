@@ -115,6 +115,61 @@ var TaskPie = (function (_super) {
         this.categories = new observable_array_1.ObservableArray();
         return this;
     };
+    Object.defineProperty(TaskPie.prototype, "counts", {
+        /**
+         * Gets or sets the 'count' values of the underlying task categories.
+         *
+         * @throws At least one new value is no valid number.
+         */
+        get: function () {
+            var countList = new observable_array_1.ObservableArray();
+            for (var i = 0; i < this._categoryLength(); i++) {
+                var cnt = null;
+                var cat = this._categoryGetter(i);
+                if (!TypeUtils.isNullOrUndefined(cat)) {
+                    cnt = cat.count;
+                }
+                countList.push(cnt);
+            }
+            return countList;
+        },
+        set: function (value) {
+            if (isEmptyString(value)) {
+                return;
+            }
+            var v = value;
+            if (!(v instanceof observable_array_1.ObservableArray) && !(v instanceof virtual_array_1.VirtualArray)) {
+                // handle as , separated string
+                // and convert 'v' to an array of numbers
+                var parts = ('' + v).trim().split(',');
+                v = [];
+                for (var i = 0; i < parts.length; i++) {
+                    var p = parts[i].trim();
+                    var cv = null;
+                    if (!isEmptyString(p)) {
+                        if (isNaN(p)) {
+                            throw "'" + p + "' is NOT a number!";
+                        }
+                        cv = parseFloat(p);
+                    }
+                    v.push(cv);
+                }
+            }
+            var itemGetter = function (itemIndex) { return v[itemIndex]; };
+            if ((v instanceof observable_array_1.ObservableArray) || (v instanceof virtual_array_1.VirtualArray)) {
+                itemGetter = function (itemIndex) { return v.getItem(itemIndex); };
+            }
+            for (var i = 0; i < v.length; i++) {
+                if (i >= this._categoryLength()) {
+                    break;
+                }
+                var cat = this._categoryGetter(i);
+                cat.count = itemGetter(i);
+            }
+        },
+        enumerable: true,
+        configurable: true
+    });
     Object.defineProperty(TaskPie.prototype, "description", {
         /**
          * Gets or sets the description.
@@ -779,6 +834,16 @@ var TaskPie = (function (_super) {
         tp.categoryStyle = toStringSafe(data.newValue);
     }));
     /**
+     * Dependency property for 'counts'
+     */
+    TaskPie.countsProperty = new dependency_observable_1.Property("counts", "TaskPie", new proxy_1.PropertyMetadata(null, dependency_observable_1.PropertyMetadataSettings.Inheritable, null, function (value) { return (value instanceof Array) ||
+        (value instanceof observable_array_1.ObservableArray) ||
+        (value instanceof virtual_array_1.VirtualArray) ||
+        isEmptyString(value); }, function (data) {
+        var tp = data.object;
+        tp.counts = data.newValue;
+    }));
+    /**
      * Dependency property for 'description'
      */
     TaskPie.descriptionProperty = new dependency_observable_1.Property("description", "TaskPie", new proxy_1.PropertyMetadata('', dependency_observable_1.PropertyMetadataSettings.Inheritable, null, function () { return true; }, function (data) {
@@ -793,6 +858,13 @@ var TaskPie = (function (_super) {
         tp.descriptionStyle = toStringSafe(data.newValue);
     }));
     /**
+     * Dependency property for 'pieGridStyle'
+     */
+    TaskPie.pieGridStyleProperty = new dependency_observable_1.Property("pieGridStyle", "TaskPie", new proxy_1.PropertyMetadata(null, dependency_observable_1.PropertyMetadataSettings.Inheritable, null, function () { return true; }, function (data) {
+        var tp = data.object;
+        tp.pieGridStyle = toStringSafe(data.newValue);
+    }));
+    /**
      * Dependency property for 'pieSize'
      */
     TaskPie.pieSizeProperty = new dependency_observable_1.Property("pieSize", "TaskPie", new proxy_1.PropertyMetadata(null, dependency_observable_1.PropertyMetadataSettings.Inheritable, null, function (value) {
@@ -804,13 +876,6 @@ var TaskPie = (function (_super) {
             newValue = TaskPieHelpers.getDefaultPieSize();
         }
         tp.pieSize = parseFloat(toStringSafe(data.newValue).trim());
-    }));
-    /**
-     * Dependency property for 'pieGridStyle'
-     */
-    TaskPie.pieGridStyleProperty = new dependency_observable_1.Property("pieGridStyle", "TaskPie", new proxy_1.PropertyMetadata(null, dependency_observable_1.PropertyMetadataSettings.Inheritable, null, function () { return true; }, function (data) {
-        var tp = data.object;
-        tp.pieGridStyle = toStringSafe(data.newValue);
     }));
     /**
      * Dependency property for 'pieStyle'
@@ -841,18 +906,18 @@ var TaskPie = (function (_super) {
         tp.pieText = toStringSafe(data.newValue);
     }));
     /**
+     * Dependency property for 'pieTextAreaStyle'
+     */
+    TaskPie.pieTextAreaStyleProperty = new dependency_observable_1.Property("pieTextAreaStyle", "TaskPie", new proxy_1.PropertyMetadata(null, dependency_observable_1.PropertyMetadataSettings.Inheritable, null, function () { return true; }, function (data) {
+        var tp = data.object;
+        tp.pieTextAreaStyle = toStringSafe(data.newValue);
+    }));
+    /**
      * Dependency property for 'pieTextStyle'
      */
     TaskPie.pieTextStyleProperty = new dependency_observable_1.Property("pieTextStyle", "TaskPie", new proxy_1.PropertyMetadata(null, dependency_observable_1.PropertyMetadataSettings.Inheritable, null, function () { return true; }, function (data) {
         var tp = data.object;
         tp.pieTextStyle = toStringSafe(data.newValue);
-    }));
-    /**
-     * Dependency property for 'pieTextStyle'
-     */
-    TaskPie.pieTextAreaStyleProperty = new dependency_observable_1.Property("pieTextAreaStyle", "TaskPie", new proxy_1.PropertyMetadata(null, dependency_observable_1.PropertyMetadataSettings.Inheritable, null, function () { return true; }, function (data) {
-        var tp = data.object;
-        tp.pieTextAreaStyle = toStringSafe(data.newValue);
     }));
     return TaskPie;
 }(Grid.GridLayout));
