@@ -210,7 +210,7 @@ To image how the view looks like you can have a look at the following XML:
 ## Dependency properties
 
 | Name | Description | CSS class |
-| ---- | --------- | --------- | --------- |
+| ---- | --------- | --------- |
 | categories | The custom category list. | `nsTaskPie-categories` |
 | categoryStyle | CSS style for category area. | `nsTaskPie-categories` |
 | countChanged | Event that is raised when a count value of a task category changed. | --- |
@@ -226,7 +226,18 @@ To image how the view looks like you can have a look at the following XML:
 | pieTextAreaStyle | CSS style of the area that contains the pie texts. | `nsTaskPie-textArea` |
 | pieTextStyle | CSS style of the pie's text. | `nsTaskPie-text` |
 
-## Add own categories
+## Categories
+
+By default you have the following categories:
+
+| Name | Color | Type (TaskCategoryType) |
+| ---- | --------- | --------- |
+| `Not started` | `ffc90e` | `NotStarted` |
+| `Late` | `d54130` | `NotStarted` |
+| `In progress` | `4cabe1` | `InProgress` |
+| `Completed` | `88be39` | `Completed` |
+
+### Add own
 
 You can use the `addCategory()` method to add categories.
 
