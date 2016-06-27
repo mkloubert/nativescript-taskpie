@@ -12,7 +12,7 @@ A [NativeScript](https://nativescript.org/) module for drawing Microsoft Planner
 ## Platforms
 
 * Android
-* iOS
+* iOS (currently in progress!)
 
 ## Installation
 
@@ -29,3 +29,318 @@ inside your app project to install the module.
 The demo app can be found [here](https://github.com/mkloubert/nativescript-taskpie/tree/master/demo).
 
 ![Demo app](https://raw.githubusercontent.com/mkloubert/nativescript-taskpie/master/demo.gif)
+
+## Usage
+
+```xml
+<Page xmlns="http://schemas.nativescript.org/tns.xsd"
+      xmlns:taskPie="nativescript-taskpie"
+      navigatingTo="onNavigatingTo">
+
+  <taskPie:TaskPie id="my-taskpie"
+                   description="79 days left"
+                   pieText="16" pieSubText="tasks left" />
+</Page>
+```
+
+Add this CSS to your `app.css`, e.g.
+
+It is possible that you have to customize some properties:
+
+```css
+.nsTaskPie-pieArea .nsTaskPie-textArea {
+    margin-top: -16;
+}
+
+.nsTaskPie-pieArea .nsTaskPie-textArea .nsTaskPie-text {
+    text-align: center;
+    font-size: 40;
+    color: #a6a6a6;
+    padding: 0;
+}
+
+.nsTaskPie-pieArea .nsTaskPie-textArea .nsTaskPie-subText {
+    text-align: center;
+    font-size: 20;
+    color: #a6a6a6;
+    margin-top: -8;
+    padding: 0;
+}
+
+.nsTaskPie-description {
+    font-size: 20;
+    margin-bottom: 12;
+}
+
+.nsTaskPie-categories .nsTaskPie-category {
+    margin-left: 4;
+    margin-right: 4;
+}
+
+.nsTaskPie-categories .nsTaskPie-border {
+    height: 8;
+}
+
+.nsTaskPie-categories .nsTaskPie-count,
+.nsTaskPie-categories .nsTaskPie-name,
+.nsTaskPie-description {
+    text-align: center;
+    color: #333333;
+}
+
+.nsTaskPie-categories .nsTaskPie-count {
+    font-size: 16;
+    margin-top: 4;
+}
+
+.nsTaskPie-categories .nsTaskPie-name {
+    font-size: 12;
+}
+```
+
+To image how the view looks like you can have a look at the following XML:
+
+```xml
+<!-- TaskPie -->
+<GridLayout cssClass="nsTaskPie"
+            rows="auto,auto,auto" columns="*">
+  
+  <!-- pieGrid() -->
+  <GridLayout cssClass="nsTaskPie-pieArea"
+              rows="auto" columns="1*,4*,1*"
+              horizontalAlignment="stretch" verticalAlignment="center">
+        
+    <!-- pieImage() -->        
+    <Image cssClass="nsTaskPie-pie"
+           col="1" row="0"
+           horizontalAlignment="stretch" verticalAlignment="center" />
+           
+    <!-- pieTextArea() -->
+    <StackLayout cssClass="nsTaskPie-textArea"
+                 col="0" row="0" colspan="3"
+                 horizontalAlignment="stretch" verticalAlignment="center">
+    
+      <!-- pieTextField() --> 
+      <Label cssClass="nsTaskPie-text" />
+      
+      <!-- pieSubTextField() --> 
+      <Label cssClass="nsTaskPie-subText" />
+    </StackLayout>
+    
+    <!-- descriptionField() -->
+    <Label cssClass="nsTaskPie-description"
+           col="0" row="1" />
+           
+    <!-- categoryGrid() --> 
+    <GridLayout cssClass="nsTaskPie-categories"
+                rows="*" columns="*,*,*,*">
+                
+      <!-- [0] "Not started" -->
+      <StackLayout cssClass="nsTaskPie-category"
+                   row="0" col="0">
+                   
+        <Border cssClass="nsTaskPie-border"
+                backgroundColor="#ffc90e"
+                horizontalAlignment="stretch" />
+        
+        <Label cssClass="nsTaskPie-count"
+               horizontalAlignment="stretch"
+               text="0" textWrap="true" />
+        
+        <Label cssClass="nsTaskPie-name"
+               horizontalAlignment="stretch"
+               text="Not started" textWrap="true" />
+      </StackLayout>
+      
+      <!-- [1] "Late" -->
+      <StackLayout cssClass="nsTaskPie-category"
+                   col="1" row="0">
+                   
+        <Border cssClass="nsTaskPie-border"
+                backgroundColor="#d54130"
+                horizontalAlignment="stretch" />
+        
+        <Label cssClass="nsTaskPie-count"
+               horizontalAlignment="stretch"
+               text="0" textWrap="true" />
+        
+        <Label cssClass="nsTaskPie-name"
+               horizontalAlignment="stretch"
+               text="Late" textWrap="true" />
+      </StackLayout>
+      
+      <!-- [2] "In progress" -->
+      <StackLayout cssClass="nsTaskPie-category"
+                   col="2" row="0">
+                   
+        <Border cssClass="nsTaskPie-border"
+                backgroundColor="#4cabe1"
+                horizontalAlignment="stretch" />
+        
+        <Label cssClass="nsTaskPie-count"
+               horizontalAlignment="stretch"
+               text="0" textWrap="true" />
+        
+        <Label cssClass="nsTaskPie-name"
+               horizontalAlignment="stretch"
+               text="In progress" textWrap="true" />
+      </StackLayout>
+      
+      <!-- [3] "Completed" -->
+      <StackLayout cssClass="nsTaskPie-category"
+                   col="3" row="0">
+                   
+        <Border cssClass="nsTaskPie-border"
+                backgroundColor="#88be39"
+                horizontalAlignment="stretch" />
+        
+        <Label cssClass="nsTaskPie-count"
+               horizontalAlignment="stretch"
+               text="0" textWrap="true" />
+        
+        <Label cssClass="nsTaskPie-name"
+               horizontalAlignment="stretch"
+               text="Completed" textWrap="true" />
+      </StackLayout>
+    </GridLayout>
+  </GridLayout>
+</GridLayout>
+```
+
+## Dependency properties
+
+| Name | Description | CSS class |
+| ---- | --------- | --------- | --------- |
+| categories | The custom category list. | `nsTaskPie-categories` |
+| categoryStyle | CSS style for category area. | `nsTaskPie-categories` |
+| description | The description (text under the pie). | `nsTaskPie-description` |
+| descriptionStyle | CSS style of the description. | `nsTaskPie-description` |
+| pieGridStyle | CSS style of the grid tat contains the pie and its texts.  | `nsTaskPie-pieArea` |
+| pieSize | The size the pie is drawed with. The highter the better is the quality, but needs more memory. Default: `300` | `nsTaskPie-pie` |
+| pieStyle | CSS style of the pie image. | `nsTaskPie-pie` |
+| pieSubText | The sub text of the pie. | `nsTaskPie-subText` |
+| pieSubTextStyle | CSS style of the pie's sub text. | `nsTaskPie-subText` |
+| pieText | The pie text. | `nsTaskPie-text` |
+| pieTextAreaStyle | CSS style of the area that contains the pie texts. | `nsTaskPie-textArea` |
+| pieTextStyle | CSS style of the pie's text. | `nsTaskPie-text` |
+
+## Add own categories
+
+You can use the `addCategory()` method to add categories.
+
+```typescript
+import TaskPieModule = require('nativescript-taskpie');
+
+export function onNavigatingTo(args) {
+    var page = args.object;
+    
+    var pie = <TaskPieModule.TaskPie>page.getViewById('my-taskpie'));
+    
+    // this switches the view in 'edit mode'
+    // what means that is not refresh until the action
+    // has been finished
+    pie.edit(() => {
+        pie.clearCategories();
+        
+        pie.addCategory('Pending', 'ffc90e', TaskPieModule.TaskCategoryType.NotStarted)
+           .addCategory('Late!', 'd54130', TaskPieModule.TaskCategoryType.NotStarted)
+           .addCategory('On work', '4cabe1', TaskPieModule.TaskCategoryType.InProgress)
+           .addCategory('Complete', '88be39', TaskPieModule.TaskCategoryType.Completed);
+    });
+}
+```
+
+You also can use the `categories` (dependency) property to set an own list of items.
+
+```typescript
+pie.categories = [
+    {
+        name: 'Pending',
+        color: 'ffc90e',
+        type: TaskPieModule.TaskCategoryType.NotStarted,
+    },
+    
+    {
+        name: 'Late!',
+        color: 'd54130',
+        type: TaskPieModule.TaskCategoryType.NotStarted,
+    },
+    
+    {
+        name: 'On work',
+        color: '4cabe1',
+        type: TaskPieModule.TaskCategoryType.InProgress,
+    },
+    
+    {
+        name: 'Complete',
+        color: '88be39',
+        type: TaskPieModule.TaskCategoryType.Completed,
+    },
+];
+```
+
+Each item has the following structure:
+
+```typescript
+interface ITaskCategory {
+    /**
+     * The color.
+     */
+    color?: string | number | Color.Color;
+
+    /**
+     * Number of tasks.
+     */
+    count?: number;
+
+    /**
+     * The name.
+     */
+    name: string;
+
+    /**
+     * The type.
+     */
+    type?: TaskCategoryType;
+}
+```
+
+The recommed way is to use the `addCategory()` method. These method creates `ITaskCategory` objects that raise change events for its properties, so this has better support for data binding.
+
+## Data binding
+
+the following example is similar to the [demp app](https://github.com/mkloubert/nativescript-taskpie/tree/master/demo).
+
+### XML
+
+```xml
+<Page xmlns="http://schemas.nativescript.org/tns.xsd"
+      xmlns:taskPie="nativescript-taskpie"
+      navigatingTo="onNavigatingTo">
+
+  <taskPie:TaskPie id="my-taskpie"
+                   pieSize="{{ pieSize }}"
+                   description="{{ daysLeft ? (daysLeft + ' days left') : null }}"
+                   pieText="{{ pie.totalLeft }}" pieSubText="tasks left" />
+</Page>
+```
+
+### ViewModel
+
+```typescript
+import Observable = require("data/observable");
+import TaskPieModule = require('nativescript-taskpie');
+
+export function onNavigatingTo(args) {
+    var page = args.object;
+    var pie = page.getViewById('my-taskpie');
+
+    var viewModel = new Observable.Observable();
+    viewModel.set('daysLeft', 79);
+    viewModel.set('pie', pie);
+    viewModel.set('pieSize', 720);  // draw pie with 720x720
+    
+    page.bindingContext = viewModel;
+}
+```
