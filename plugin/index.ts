@@ -502,8 +502,13 @@ export class TaskPie extends Grid.GridLayout {
                 break;
             }
 
+            var nv = itemGetter(i);
+            if (TypeUtils.isUndefined(nv)) {
+                continue;
+            }
+
             var cat = this._categoryGetter(i);
-            cat.count = itemGetter(i);
+            cat.count = nv;
         }
     }
 

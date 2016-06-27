@@ -8,6 +8,7 @@
   </Page.actionBar>
 
   <taskPie:TaskPie id="mjk-test-taskpie"
+                   counts="{{ taskCounts }}"
                    pieSize="{{ pieSize }}"
                    description="{{ daysLeft ? (daysLeft + ' days left') : null }}"
                    pieText="{{ pie.totalLeft }}" pieSubText="tasks left" />

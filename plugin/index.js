@@ -163,8 +163,12 @@ var TaskPie = (function (_super) {
                 if (i >= this._categoryLength()) {
                     break;
                 }
+                var nv = itemGetter(i);
+                if (TypeUtils.isUndefined(nv)) {
+                    continue;
+                }
                 var cat = this._categoryGetter(i);
-                cat.count = itemGetter(i);
+                cat.count = nv;
             }
         },
         enumerable: true,
