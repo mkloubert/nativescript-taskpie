@@ -30,6 +30,12 @@ The demo app can be found [here](https://github.com/mkloubert/nativescript-taskp
 
 ![Demo app](https://raw.githubusercontent.com/mkloubert/nativescript-taskpie/master/demo.gif)
 
+## Documentation
+
+Documentation is in progress.
+
+Have a look at the [index.ts](https://github.com/mkloubert/nativescript-taskpie/blob/master/plugin/index.ts) file to get an overview of all types, methods and properties.
+
 ## Usage
 
 ```xml
@@ -210,9 +216,11 @@ To image how the view looks like you can have a look at the following XML:
 ## Dependency properties
 
 | Name | Description | CSS class |
-| ---- | --------- | --------- | --------- |
+| ---- | --------- | --------- |
 | categories | The custom category list. | `nsTaskPie-categories` |
 | categoryStyle | CSS style for category area. | `nsTaskPie-categories` |
+| countChanged | Event that is raised when a count value of a task category changed. | --- |
+| counts | The list of the category's count values. | --- |
 | description | The description (text under the pie). | `nsTaskPie-description` |
 | descriptionStyle | CSS style of the description. | `nsTaskPie-description` |
 | pieGridStyle | CSS style of the grid tat contains the pie and its texts.  | `nsTaskPie-pieArea` |
@@ -224,7 +232,18 @@ To image how the view looks like you can have a look at the following XML:
 | pieTextAreaStyle | CSS style of the area that contains the pie texts. | `nsTaskPie-textArea` |
 | pieTextStyle | CSS style of the pie's text. | `nsTaskPie-text` |
 
-## Add own categories
+## Categories
+
+By default you have the following categories:
+
+| Name | Color | Type (TaskCategoryType) |
+| ---- | --------- | --------- |
+| `Not started` | `ffc90e` | `NotStarted` |
+| `Late` | `d54130` | `NotStarted` |
+| `In progress` | `4cabe1` | `InProgress` |
+| `Completed` | `88be39` | `Completed` |
+
+### Add own
 
 You can use the `addCategory()` method to add categories.
 
@@ -310,7 +329,7 @@ The recommed way is to use the `addCategory()` method. These method creates `ITa
 
 ## Data binding
 
-the following example is similar to the [demp app](https://github.com/mkloubert/nativescript-taskpie/tree/master/demo).
+The following example is similar to the [demp app](https://github.com/mkloubert/nativescript-taskpie/tree/master/demo).
 
 ### XML
 
@@ -320,9 +339,11 @@ the following example is similar to the [demp app](https://github.com/mkloubert/
       navigatingTo="onNavigatingTo">
 
   <taskPie:TaskPie id="my-taskpie"
+                   counts="{{ taskCounts }}"
                    pieSize="{{ pieSize }}"
                    description="{{ daysLeft ? (daysLeft + ' days left') : null }}"
-                   pieText="{{ pie.totalLeft }}" pieSubText="tasks left" />
+                   pieText="{{ pie.totalLeft }}" pieSubText="tasks left"
+                   countChanged="{{ taskCountChanged }}" />
 </Page>
 ```
 
@@ -334,12 +355,17 @@ import TaskPieModule = require('nativescript-taskpie');
 
 export function onNavigatingTo(args) {
     var page = args.object;
-    var pie = page.getViewById('my-taskpie');
+    var pie = <TaskPieModule.TaskPie>page.getViewById('my-taskpie');
 
-    var viewModel = new Observable.Observable();
-    viewModel.set('daysLeft', 79);
+    var viewModel: any = new Observable.Observable();
+    viewModel.set('daysLeft', 79);  // value for description
     viewModel.set('pie', pie);
     viewModel.set('pieSize', 720);  // draw pie with 720x720
+    viewModel.set('taskCounts', [11, 4, 1, 11]);  // initial count values
+    
+    viewModel.taskCountChanged = (category, newValue, oldValue, pie) => {
+        console.log("Value of category '" + category.name + "' changed from '" + oldValue + "' to '" + newValue + "'.");
+    };
     
     page.bindingContext = viewModel;
 }
