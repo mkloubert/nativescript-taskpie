@@ -5,6 +5,8 @@
 
 A [NativeScript](https://nativescript.org/) module for drawing Microsoft Planner like progress charts.
 
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=HU3K4L5ABS6J6)
+
 ## License
 
 [MIT license](https://raw.githubusercontent.com/mkloubert/nativescript-taskpie/master/LICENSE)
