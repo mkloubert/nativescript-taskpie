@@ -312,7 +312,7 @@ The recommed way is to use the `addCategory()` method. These method creates `ITa
 
 ## Data binding
 
-the following example is similar to the [demp app](https://github.com/mkloubert/nativescript-taskpie/tree/master/demo).
+The following example is similar to the [demp app](https://github.com/mkloubert/nativescript-taskpie/tree/master/demo).
 
 ### XML
 
