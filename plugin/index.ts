@@ -164,6 +164,22 @@ export class TaskPie extends Grid.GridLayout {
                              })
     );
     /**
+     * Dependency property for 'countChanged'
+     */
+    public static countChangedProperty = new Property(
+        "countChanged",
+        "TaskPie",
+        new PropertyMetadata(null,
+                             PropertyMetadataSettings.Inheritable,
+                             null,
+                             () => true,
+                             (data) => {
+                                 var tp = <TaskPie>data.object;
+
+                                 tp.countChanged = data.newValue;
+                             })
+    );
+    /**
      * Dependency property for 'counts'
      */
     public static countsProperty = new Property(
@@ -442,6 +458,11 @@ export class TaskPie extends Grid.GridLayout {
     }
 
     /**
+     * Gets or sets the callback that is invoked when the count value of a task category has been changed.
+     */
+    public countChanged: (cat: ITaskCategory, newValue: number, oldValue: number, pie: TaskPie) => void | string;
+
+    /**
      * Gets or sets the 'count' values of the underlying task categories.
      * 
      * @throws At least one new value is no valid number.
@@ -513,6 +534,48 @@ export class TaskPie extends Grid.GridLayout {
     }
 
     /**
+     * Increases the count value of a category.
+     * 
+     * @chainable
+     * 
+     * @param {Number} index The zero based index of the category.
+     * @param any [decreaseBy] The custom value to use or the function provides it.
+     * 
+     * @throws Decrease value is NOT valid.
+     */
+    public decrease(index: number, decreaseBy?: (curVal: number, category: ITaskCategory, index: number, pie: TaskPie) => number | number): TaskPie {
+        if (TypeUtils.isNullOrUndefined(decreaseBy)) {
+            decreaseBy = <any>1;
+        }
+        
+        var decreaseByFunc: any = decreaseBy;
+        if (typeof decreaseByFunc !== "function") {
+            decreaseByFunc = () => decreaseBy;
+        }
+
+        var cat = this._categoryGetter(index);
+        var decreaseVal = decreaseByFunc(cat.count, cat, index, this);
+        if (!isEmptyString(decreaseVal)) {
+            decreaseVal = ('' + decreaseVal).trim();
+            if (isNaN(decreaseVal)) {
+                throw "'" + decreaseVal + "' is NOT a valid number!";
+            }
+
+            decreaseVal = parseFloat(decreaseVal);
+
+            var newValue = cat.count;
+            if (isEmptyString(newValue)) {
+                newValue = 0;
+            }
+
+            newValue -= decreaseVal;
+            cat.count = newValue;
+        }
+
+        return this;
+    }
+
+    /**
      * Gets or sets the description.
      */
     public get description(): string {
@@ -581,6 +644,48 @@ export class TaskPie extends Grid.GridLayout {
      */
     public getCategory(index: number): ITaskCategory {
         return this._categoryGetter(index);
+    }
+
+    /**
+     * Increases the count value of a category.
+     * 
+     * @chainable
+     * 
+     * @param {Number} index The zero based index of the category.
+     * @param any [increaseBy] The custom value to use or the function provides it.
+     * 
+     * @throws Increase value is NOT valid.
+     */
+    public increase(index: number, increaseBy?: (curVal: number, category: ITaskCategory, index: number, pie: TaskPie) => number | number): TaskPie {
+        if (TypeUtils.isNullOrUndefined(increaseBy)) {
+            increaseBy = <any>1;
+        }
+        
+        var increaseByFunc: any = increaseBy;
+        if (typeof increaseByFunc !== "function") {
+            increaseByFunc = () => increaseBy;
+        }
+
+        var cat = this._categoryGetter(index);
+        var increaseVal = increaseByFunc(cat.count, cat, index, this);
+        if (!isEmptyString(increaseVal)) {
+            increaseVal = ('' + increaseVal).trim();
+            if (isNaN(increaseVal)) {
+                throw "'" + increaseVal + "' is NOT a valid number!";
+            }
+
+            increaseVal = parseFloat(increaseVal);
+
+            var newValue = cat.count;
+            if (isEmptyString(newValue)) {
+                newValue = 0;
+            }
+
+            newValue += increaseVal;
+            cat.count = newValue;
+        }
+
+        return this;
     }
 
     /**
@@ -806,6 +911,32 @@ export class TaskPie extends Grid.GridLayout {
         if (withCategories) {
             this.notifyPropertyChange("categories", this._categories);
         }
+    }
+
+    /**
+     * Raises the 'count changed' event callback.
+     */
+    public raiseCountChanged(category: ITaskCategory, oldValue: number) {
+        var pie = this;
+
+        var callback = this.countChanged;
+        if (TypeUtils.isNullOrUndefined(callback)) {
+            return;
+        }
+
+        var cb: any = callback;
+        if (typeof cb !== "function") {
+            // handle as function name
+
+            var funcName = ('' + cb).trim();
+            if ('' !== funcName) {
+                cb = () => {
+                    eval(funcName + '(category, category.count, oldValue, pie);');
+                };
+            }
+        }
+
+        cb(category, category.count, oldValue, this);
     }
 
     /**
@@ -1283,11 +1414,13 @@ export class TaskCategory extends Observable.Observable implements ITaskCategory
             return;
         }
 
+        var oldValue = this._count;
         this._count = value;
         this.notifyPropertyChange("count", value);
 
         this.parent.refresh();
         this.parent.raiseCategoryProperties();
+        this.parent.raiseCountChanged(this, oldValue);
     }
 
     /** @inheritdoc */

@@ -174,6 +174,41 @@ var TaskPie = (function (_super) {
         enumerable: true,
         configurable: true
     });
+    /**
+     * Increases the count value of a category.
+     *
+     * @chainable
+     *
+     * @param {Number} index The zero based index of the category.
+     * @param any [decreaseBy] The custom value to use or the function provides it.
+     *
+     * @throws Decrease value is NOT valid.
+     */
+    TaskPie.prototype.decrease = function (index, decreaseBy) {
+        if (TypeUtils.isNullOrUndefined(decreaseBy)) {
+            decreaseBy = 1;
+        }
+        var decreaseByFunc = decreaseBy;
+        if (typeof decreaseByFunc !== "function") {
+            decreaseByFunc = function () { return decreaseBy; };
+        }
+        var cat = this._categoryGetter(index);
+        var decreaseVal = decreaseByFunc(cat.count, cat, index, this);
+        if (!isEmptyString(decreaseVal)) {
+            decreaseVal = ('' + decreaseVal).trim();
+            if (isNaN(decreaseVal)) {
+                throw "'" + decreaseVal + "' is NOT a valid number!";
+            }
+            decreaseVal = parseFloat(decreaseVal);
+            var newValue = cat.count;
+            if (isEmptyString(newValue)) {
+                newValue = 0;
+            }
+            newValue -= decreaseVal;
+            cat.count = newValue;
+        }
+        return this;
+    };
     Object.defineProperty(TaskPie.prototype, "description", {
         /**
          * Gets or sets the description.
@@ -245,6 +280,41 @@ var TaskPie = (function (_super) {
      */
     TaskPie.prototype.getCategory = function (index) {
         return this._categoryGetter(index);
+    };
+    /**
+     * Increases the count value of a category.
+     *
+     * @chainable
+     *
+     * @param {Number} index The zero based index of the category.
+     * @param any [increaseBy] The custom value to use or the function provides it.
+     *
+     * @throws Increase value is NOT valid.
+     */
+    TaskPie.prototype.increase = function (index, increaseBy) {
+        if (TypeUtils.isNullOrUndefined(increaseBy)) {
+            increaseBy = 1;
+        }
+        var increaseByFunc = increaseBy;
+        if (typeof increaseByFunc !== "function") {
+            increaseByFunc = function () { return increaseBy; };
+        }
+        var cat = this._categoryGetter(index);
+        var increaseVal = increaseByFunc(cat.count, cat, index, this);
+        if (!isEmptyString(increaseVal)) {
+            increaseVal = ('' + increaseVal).trim();
+            if (isNaN(increaseVal)) {
+                throw "'" + increaseVal + "' is NOT a valid number!";
+            }
+            increaseVal = parseFloat(increaseVal);
+            var newValue = cat.count;
+            if (isEmptyString(newValue)) {
+                newValue = 0;
+            }
+            newValue += increaseVal;
+            cat.count = newValue;
+        }
+        return this;
     };
     /**
      * Initializes that instance.
@@ -493,6 +563,27 @@ var TaskPie = (function (_super) {
         if (withCategories) {
             this.notifyPropertyChange("categories", this._categories);
         }
+    };
+    /**
+     * Raises the 'count changed' event callback.
+     */
+    TaskPie.prototype.raiseCountChanged = function (category, oldValue) {
+        var pie = this;
+        var callback = this.countChanged;
+        if (TypeUtils.isNullOrUndefined(callback)) {
+            return;
+        }
+        var cb = callback;
+        if (typeof cb !== "function") {
+            // handle as function name
+            var funcName = ('' + cb).trim();
+            if ('' !== funcName) {
+                cb = function () {
+                    eval(funcName + '(category, category.count, oldValue, pie);');
+                };
+            }
+        }
+        cb(category, category.count, oldValue, this);
     };
     /**
      * Refreshs the view.
@@ -838,6 +929,13 @@ var TaskPie = (function (_super) {
         tp.categoryStyle = toStringSafe(data.newValue);
     }));
     /**
+     * Dependency property for 'countChanged'
+     */
+    TaskPie.countChangedProperty = new dependency_observable_1.Property("countChanged", "TaskPie", new proxy_1.PropertyMetadata(null, dependency_observable_1.PropertyMetadataSettings.Inheritable, null, function () { return true; }, function (data) {
+        var tp = data.object;
+        tp.countChanged = data.newValue;
+    }));
+    /**
      * Dependency property for 'counts'
      */
     TaskPie.countsProperty = new dependency_observable_1.Property("counts", "TaskPie", new proxy_1.PropertyMetadata(null, dependency_observable_1.PropertyMetadataSettings.Inheritable, null, function (value) { return (value instanceof Array) ||
@@ -1001,10 +1099,12 @@ var TaskCategory = (function (_super) {
             if (this._count === value) {
                 return;
             }
+            var oldValue = this._count;
             this._count = value;
             this.notifyPropertyChange("count", value);
             this.parent.refresh();
             this.parent.raiseCategoryProperties();
+            this.parent.raiseCountChanged(this, oldValue);
         },
         enumerable: true,
         configurable: true

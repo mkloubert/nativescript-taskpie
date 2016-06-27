@@ -11,5 +11,6 @@
                    counts="{{ taskCounts }}"
                    pieSize="{{ pieSize }}"
                    description="{{ daysLeft ? (daysLeft + ' days left') : null }}"
-                   pieText="{{ pie.totalLeft }}" pieSubText="tasks left" />
+                   pieText="{{ pie.totalLeft }}" pieSubText="tasks left"
+                   countChanged="{{ taskCountChanged }}" />
 </Page>
