@@ -38,7 +38,11 @@ function normalizeAngel(v) {
 }
 
 function createBitmap(width, height) {
-    var uii;
+    var uii = new interop.Reference();
+
+    UIGraphicsBeginImageContextWithOptions(CGSizeMake(width, height), false, 0.0);
+    uii = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
 
     return {
         __uiimage: uii,
@@ -132,9 +136,12 @@ function createBitmap(width, height) {
                 y: top
             };
 
+            var radius = Math.max(right - left,
+                                  bottom - top);
+
             var centerPoint = {
-                x: startPoint.x + radius,
-                y: startPoint.y + radius
+                x: startPoint.x + (right - left),
+                y: startPoint.y + (bottom - top)
             };
 
             var endAngle = startAngle + sweepAngle;
@@ -154,17 +161,16 @@ function createBitmap(width, height) {
             this.__onImageContext(function(context, oldImg, tag) {
                 var arc = CGPathCreateMutable();
    
-                CGPathMoveToPoint(arc, NULL,
+                CGPathMoveToPoint(arc, null,
                                   startPoint.x, startPoint.y);
 
-                CGPathAddArc(arc, NULL,
+                CGPathAddArc(arc, null,
                              centerPoint.x, centerPoint.y,
                              radius,
                              startAngle, endAngle,
                              true);
 
-
-                var strokedArc = CGPathCreateCopyByStrokingPath(arc, NULL,
+                var strokedArc = CGPathCreateCopyByStrokingPath(arc, null,
                                                                 1,  // line width
                                                                 kCGLineCapButt,
                                                                 kCGLineJoinMiter, // the default
