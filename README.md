@@ -34,7 +34,7 @@ The demo app can be found [here](https://github.com/mkloubert/nativescript-taskp
 
 Documentation is in progress.
 
-Have a look at the [index.ts](https://github.com/mkloubert/nativescript-taskpie/blob/master/plugin/index.ts) file to get an overview on all types, methods and properties.
+Have a look at the [index.ts](https://github.com/mkloubert/nativescript-taskpie/blob/master/plugin/index.ts) file to get an overview of all types, methods and properties.
 
 ## Usage
 
