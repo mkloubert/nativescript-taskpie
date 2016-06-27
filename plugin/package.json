@@ -1,7 +1,7 @@
 {
 	"name": "nativescript-taskpie",
 	"description": "A NativeScript module for drawing Microsoft Planner like progress charts.",
-	"version": "0.4.0",
+	"version": "0.4.1",
 	"nativescript": {
 		"platforms": {
 			"ios": "1.0.0",
@@ -14,10 +14,11 @@
 	},
 	"keywords": [
 		"NativeScript",
-		"LINQ",
-		"Enumerable",
-		"Lists",
-		"Collections"
+		"Tasks",
+		"Pies",
+		"Charts",
+		"Views",
+		"Controls"
 	],
 	"author": {
 		"name": "Marcel Joachim Kloubert",
