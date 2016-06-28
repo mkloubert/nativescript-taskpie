@@ -225,7 +225,7 @@ The following XML shows the structure of a `TaskPie` view:
 | description | The description (text under the pie). | `nsTaskPie-description` |
 | descriptionStyle | CSS style of the description. | `nsTaskPie-description` |
 | pieGridStyle | CSS style of the grid tat contains the pie and its texts.  | `nsTaskPie-pieArea` |
-| pieSize | The size the pie is drawed with. The highter the better is the quality, but needs more memory. Default: `300` | `nsTaskPie-pie` |
+| pieSize | The size the pie is drawed with. The higher the better is the quality, but needs more memory. Default: `300` | `nsTaskPie-pie` |
 | pieStyle | CSS style of the pie image. | `nsTaskPie-pie` |
 | pieSubText | The sub text of the pie. | `nsTaskPie-subText` |
 | pieSubTextStyle | CSS style of the pie's sub text. | `nsTaskPie-subText` |
