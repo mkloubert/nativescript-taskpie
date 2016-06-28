@@ -34,9 +34,9 @@ The demo app can be found [here](https://github.com/mkloubert/nativescript-taskp
 
 ## Documentation
 
-Documentation is in progress.
-
 Have a look at the [index.ts](https://github.com/mkloubert/nativescript-taskpie/blob/master/plugin/index.ts) file to get an overview of all types, methods and properties.
+
+Otherwise...
 
 ## Usage
 
@@ -106,12 +106,11 @@ It is possible that you have to customize some properties:
 }
 ```
 
-To image how the view looks like you can have a look at the following XML:
+The following XML shows the structure of a `TaskPie` view:
 
 ```xml
-<!-- TaskPie -->
-<GridLayout cssClass="nsTaskPie"
-            rows="auto,auto,auto" columns="*">
+<TaskPie cssClass="nsTaskPie"
+         rows="auto,auto,auto" columns="*">
   
   <!-- pieGrid() -->
   <GridLayout cssClass="nsTaskPie-pieArea"
@@ -212,7 +211,7 @@ To image how the view looks like you can have a look at the following XML:
       </StackLayout>
     </GridLayout>
   </GridLayout>
-</GridLayout>
+</TaskPie>
 ```
 
 ## Dependency properties
